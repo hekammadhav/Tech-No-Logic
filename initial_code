@@ -1,0 +1,12 @@
+I = imread('apple1.jpg');
+
+I=im2bw(I);
+imshow(I)
+hold on
+
+mask = false(size(I));
+mask(50:150,40:170) = true;
+
+visboundaries(mask,'Color','b');
+
+bw = activecontour(I, mask, 200, 'edge');
