@@ -1,0 +1,41 @@
+Im = imread('apple.jpg');
+I=rgb2gray(Im);
+
+figure, imshow(I), title('original image');
+text(size(I,2),size(I,1)+15, ...
+    'Image courtesy of Alan Partin', ...
+    'FontSize',7,'HorizontalAlignment','right');
+text(size(I,2),size(I,1)+25, ....
+    'Johns Hopkins University', ...
+    'FontSize',7,'HorizontalAlignment','right');
+
+[~, threshold] = edge(I, 'sobel');
+fudgeFactor = .5;
+BWs = edge(I,'sobel', threshold * fudgeFactor);
+figure, imshow(BWs), title('binary gradient mask');
+
+se90 = strel('line', 3, 90);
+se0 = strel('line', 3, 0);
+
+BWsdil = imdilate(BWs, [se90 se0]);
+figure, imshow(BWsdil), title('dilated gradient mask');
+
+BWdfill = imfill(BWsdil, 'holes');
+figure, imshow(BWdfill);
+title('binary image with filled holes');    
+[centers,radii,metric]=imfindcircles(BWdfill,[round(size(BWdfill,1),-2)/100 size(BWdfill,1)]);
+viscircles(centers(end,:), radii(end,:),'EdgeColor','b');
+
+R=Im(round(centers(end,1),0),round(centers(end,2),0),1)
+G=Im(round(centers(end,1),0),round(centers(end,2),0),2)
+B=Im(round(centers(end,1),0),round(centers(end,2),0),3)
+
+if(G<128 & B<128 & R>165)
+    disp('apple');
+end
+if(G>69 & G<165 & B==0 & R==255)
+    disp('orange');
+end
+if(G>200 & B<50 & R<70)
+    disp('green');
+end
