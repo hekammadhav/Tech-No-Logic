@@ -1,0 +1,61 @@
+I=imread('Gems.png');
+imshow(I);
+I=im2double(I);
+[r,c,p]= size(I);
+%extract individual plane for RGB
+imR=squeeze(I(:,:,1));
+imG=squeeze(I(:,:,2));
+imB=squeeze(I(:,:,3));
+
+%thresholding on individual planes
+imBinaryR=im2bw(imR,graythresh(imR));
+imBinaryG=im2bw(imG,graythresh(imG));
+imBinaryB=im2bw(imB,graythresh(imB));
+imBinary=imcomplement(imBinaryR&imBinaryG&imBinaryB);
+imshow(imBinary);
+
+[labels,numLabels]=bwlabel(imClean);
+disp(['No. of obj detected: ' num2str(numLabels)]);
+
+rLabel=zeros(r,c);
+gLabel=zeros(r,c);
+bLabel=zeros(r,c);
+%fill morphologicsl opening
+se=strel('disk',7);
+imClean=imfill(imClean,'holes');
+imClean=imClearborder(imClean);
+imshow(imClean);
+
+%get average color vector for each labelled region
+for i=1:numLabels
+rLabel(labels==i)=median(imR(labels==i));
+gLabel(labels==i)=median(imG(labels==i));
+bLabel(labels==i)=median(imB(labels==i));
+end
+
+imLabel=cat(3,rLabel,gLabel,bLabel);
+imshow(imLabel)
+impixelinfo(gcf);
+
+%get desired color to segment
+[x,y]=ginput(1);
+selColor=imLabel(floor(y),floor(x),:);
+
+%convert to LAB color space 
+C=makecform('srgb2lab');
+imLAB=applycform(imLabel,C);
+imSelLAB=applycform(selColor,C);
+
+%extract A and B
+imA=imLAB(:,:,2);
+imB=imLAB(:,:,3);
+imSelA=imSelLAB(1,2);
+imSelB=imSelLAB(1,3);
+
+%compute distance from selected color
+distThresh = 10;
+imMask=zeros(r,c);
+imDist=hypot(imA-imSelA,imB-imSelB);
+imMAsk(imDist<distThresh)=1;
+[cLabel,cNum]=bwlabel(imMask);
+imSeg=repmat(selColor,[r,c,1]).*repmat(imMask,[1,1,3]);
