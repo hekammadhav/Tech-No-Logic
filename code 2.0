@@ -1,27 +1,51 @@
-I=imread('Gems.jpeg');
+I = imread('1.jpg');
+I=rgb2gray(I);
+
+figure, imshow(I), title('original image');
+text(size(I,2),size(I,1)+15, ...
+    'Image courtesy of Alan Partin', ...
+    'FontSize',7,'HorizontalAlignment','right');
+text(size(I,2),size(I,1)+25, ....
+    'Johns Hopkins University', ...
+    'FontSize',7,'HorizontalAlignment','right');
+
+[~, threshold] = edge(I, 'sobel');
+fudgeFactor = .5;
+BWs = edge(I,'sobel', threshold * fudgeFactor);
+figure, imshow(BWs), title('binary gradient mask');
+
+se90 = strel('line', 3, 90);
+se0 = strel('line', 3, 0);
+
+BWsdil = imdilate(BWs, [se90 se0]);
+figure, imshow(BWsdil), title('dilated gradient mask');
+
+BWdfill = imfill(BWsdil, 'holes');
+figure, imshow(BWdfill);
+title('binary image with filled holes');    
+
+%BWnobord = imclearborder(BWdfill, 4);
+%figure, imshow(BWnobord), title('cleared border image');
+
+%seD = strel('diamond',1);
+%BWfinal = imerode(BWnobord,seD);
+%BWfinal = imerode(BWfinal,seD);
+%figure, imshow(BWfinal), title('segmented image');
+%[centers,radii,metric]=imfindcircles(BWfinal,[round(size(image,1),-2)/100 size(image,1)]);
+
+%viscircles(centers, radii,'EdgeColor','b');
+
+%BWoutline = bwperim(BWfinal);
+%Segout = I;
+%Segout(BWoutline) = 255;
+%figure, imshow(Segout), title('outlined original image');
+
+I=BWdfill;
 imshow(I);
+%J = adapthisteq(I,'clipLimit',0.02,'Distribution','rayleigh');
 I=im2double(I);
 [r,c,p]= size(I);
 %extract individual plane for RGB
-imR=squeeze(I(:,:,1));
-imG=squeeze(I(:,:,2));
-imB=squeeze(I(:,:,3));
-
-%thresholding on individual planes
-imBinaryR=im2bw(imR,graythresh(imR));
-imBinaryG=im2bw(imG,graythresh(imG));
-imBinaryB=im2bw(imB,graythresh(imB));
-imBinary=imcomplement(imBinaryR&imBinaryG&imBinaryB);
-imshow(imBinary);
-
-
-%fill morphologicsl opening
-se=strel('disk',7);
-imClean=imopen(imBinary,se);
-
-imClean=imfill(imClean,'holes');
-imClean=imclearborder(imClean);
-imshow(imClean);
 
 [labels,numLabels]=bwlabel(imClean);
 disp(['No. of obj detected: ' num2str(numLabels)]);
