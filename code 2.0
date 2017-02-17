@@ -1,4 +1,4 @@
-I=imread('Gems.png');
+I=imread('Gems.jpeg');
 imshow(I);
 I=im2double(I);
 [r,c,p]= size(I);
@@ -14,17 +14,22 @@ imBinaryB=im2bw(imB,graythresh(imB));
 imBinary=imcomplement(imBinaryR&imBinaryG&imBinaryB);
 imshow(imBinary);
 
+
+%fill morphologicsl opening
+se=strel('disk',7);
+imClean=imopen(imBinary,se);
+
+imClean=imfill(imClean,'holes');
+imClean=imclearborder(imClean);
+imshow(imClean);
+
 [labels,numLabels]=bwlabel(imClean);
 disp(['No. of obj detected: ' num2str(numLabels)]);
 
 rLabel=zeros(r,c);
 gLabel=zeros(r,c);
 bLabel=zeros(r,c);
-%fill morphologicsl opening
-se=strel('disk',7);
-imClean=imfill(imClean,'holes');
-imClean=imClearborder(imClean);
-imshow(imClean);
+
 
 %get average color vector for each labelled region
 for i=1:numLabels
@@ -56,6 +61,12 @@ imSelB=imSelLAB(1,3);
 distThresh = 10;
 imMask=zeros(r,c);
 imDist=hypot(imA-imSelA,imB-imSelB);
-imMAsk(imDist<distThresh)=1;
+imMask(imDist<distThresh)=1;
 [cLabel,cNum]=bwlabel(imMask);
 imSeg=repmat(selColor,[r,c,1]).*repmat(imMask,[1,1,3]);
+imshow(imSeg)
+
+figure, subplot(2,1,1),imshow(I);
+title(['Total number of objects= ', num2str(numLabels)]);
+subplot(2,1,2),imshow(imSeg);
+title(['No. of objects of selected color= ', num2str(cNum)]);
