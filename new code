@@ -1,24 +1,23 @@
-banana=imread('banana.jpeg');
-
-boxImage = rgb2gray(banana);
+boxImage = imread('apple.jpg');
+boxImage=rgb2gray(boxImage);
 figure;
 imshow(boxImage);
-title('Image of a banana');
-combine= imread('combine.png');
-sceneImage = rgb2gray(combine);
-% figure;
-% imshow(sceneImage);
-% title('Image of a Cluttered Scene');
+title('Image of a Box');
+sceneImage = imread('apple.jpg');
+sceneImage=rgb2gray(sceneImage);
+figure;
+imshow(sceneImage);
+title('Image of a Cluttered Scene');
 boxPoints = detectSURFFeatures(boxImage);
 scenePoints = detectSURFFeatures(sceneImage);
-% figure;
-% imshow(boxImage);
-% title('100 Strongest Feature Points from Box Image');
+figure;
+imshow(boxImage);
+title('100 Strongest Feature Points from Box Image');
 hold on;
 plot(selectStrongest(boxPoints, 100));
-% figure;
-% imshow(sceneImage);
-% title('300 Strongest Feature Points from Scene Image');
+figure;
+imshow(sceneImage);
+title('300 Strongest Feature Points from Scene Image');
 hold on;
 plot(selectStrongest(scenePoints, 300));
 [boxFeatures, boxPoints] = extractFeatures(boxImage, boxPoints);
@@ -48,44 +47,44 @@ imshow(sceneImage);
 hold on;
 line(newBoxPolygon(:, 1), newBoxPolygon(:, 2), 'Color', 'y');
 title('Detected Box');
-apple=imread('apple1.jpeg');
-elephantImage = rgb2gray(apple);
+bananaImage = imread('banana1.bmp');
+bananaImage=rgb2gray(bananaImage);
 figure;
-imshow(elephantImage);
-title('Image of an apple');
-elephantPoints = detectSURFFeatures(elephantImage);
-% figure;
-% imshow(elephantImage);
-% hold on;
-% plot(selectStrongest(elephantPoints, 100));
-% title('100 Strongest Feature Points from Elephant Image');
-[elephantFeatures, elephantPoints] = extractFeatures(elephantImage, elephantPoints);
-elephantPairs = matchFeatures(elephantFeatures, sceneFeatures, 'MaxRatio', 0.9);
-matchedElephantPoints = elephantPoints(elephantPairs(:, 1), :);
-matchedScenePoints = scenePoints(elephantPairs(:, 2), :);
+imshow(bananaImage);
+title('Image of an food');
+foodPoints = detectSURFFeatures(bananaImage);
 figure;
-showMatchedFeatures(elephantImage, sceneImage, matchedElephantPoints, ...
+imshow(bananaImage);
+hold on;
+plot(selectStrongest(foodPoints, 100));
+title('100 Strongest Feature Points from food Image');
+[foodFeatures, foodPoints] = extractFeatures(bananaImage, foodPoints);
+foodPairs = matchFeatures(foodFeatures, sceneFeatures, 'MaxRatio', 0.9);
+matchedfoodPoints = foodPoints(foodPairs(:, 1), :);
+matchedScenePoints = scenePoints(foodPairs(:, 2), :);
+figure;
+showMatchedFeatures(bananaImage, sceneImage, matchedfoodPoints, ...
     matchedScenePoints, 'montage');
 title('Putatively Matched Points (Including Outliers)');
 
-[tform, inlierElephantPoints, inlierScenePoints] = ...
-    estimateGeometricTransform(matchedElephantPoints, matchedScenePoints, 'affine');
+[tform, inlierfoodPoints, inlierScenePoints] = ...
+    estimateGeometricTransform(matchedfoodPoints, matchedScenePoints, 'affine');
 figure;
-showMatchedFeatures(elephantImage, sceneImage, inlierElephantPoints, ...
+showMatchedFeatures(bananaImage, sceneImage, inlierfoodPoints, ...
     inlierScenePoints, 'montage');
 title('Matched Points (Inliers Only)');
 
-elephantPolygon = [1, 1;...                                 % top-left
-        size(elephantImage, 2), 1;...                       % top-right
-        size(elephantImage, 2), size(elephantImage, 1);...  % bottom-right
-        1, size(elephantImage, 1);...                       % bottom-left
+foodPolygon = [1, 1;...                                 % top-left
+        size(bananaImage, 2), 1;...                       % top-right
+        size(bananaImage, 2), size(bananaImage, 1);...  % bottom-right
+        1, size(bananaImage, 1);...                       % bottom-left
         1,1];                         % top-left again to close the polygon
 
-newElephantPolygon = transformPointsForward(tform, elephantPolygon);
+newfoodPolygon = transformPointsForward(tform, foodPolygon);
 
 figure;
 imshow(sceneImage);
 hold on;
 line(newBoxPolygon(:, 1), newBoxPolygon(:, 2), 'Color', 'y');
-line(newElephantPolygon(:, 1), newElephantPolygon(:, 2), 'Color', 'g');
-title('Detected banana and apple');
+line(newfoodPolygon(:, 1), newfoodPolygon(:, 2), 'Color', 'g');
+title('Detected food and Box');
