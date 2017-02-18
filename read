@@ -1,0 +1,96 @@
+% boxImage = imread('apple1.jpeg');
+% boxImage=rgb2gray(boxImage);
+% figure;
+%  imshow(boxImage);
+% title('Image of a Box');
+sceneImage = imread('Strawberry.jpg');
+sceneImage=rgb2gray(sceneImage);
+% figure;
+  imshow(sceneImage);
+% title('Image of a Cluttered Scene');
+% boxPoints = detectSURFFeatures(boxImage);
+scenePoints = detectSURFFeatures(sceneImage);
+% figure;
+%  imshow(boxImage);
+% title('100 Strongest Feature Points from Box Image');
+% hold on;
+% plot(selectStrongest(boxPoints, 100));
+% figure;
+%  imshow(sceneImage);
+title('300 Strongest Feature Points from Scene Image');
+hold on;
+plot(selectStrongest(scenePoints, 300));
+
+[sceneFeatures, scenePoints] = extractFeatures(sceneImage, scenePoints);
+
+filename = 'fruit_calories.xlsx';
+sheet = 1;
+temp ='A2:B5';
+
+A = xlsread(filename,sheet,temp);
+B = xlsread(filename,sheet,dist);
+% C = xlsread(filename,sheet,'D2:D24');
+% D = xlsread(filename,sheet,'E2:E24');  
+disp(temp);
+
+
+
+for i = 1 : 36
+  filename = strcat('training/',(i/10+48),(mod(i,10)+48),'.jpg');
+  I = imread(filename);
+%   figure, imshow(I);
+% title('Detected Box');
+fiImage=rgb2gray(I);
+% figure;
+% imshow(fiImage);
+% title('Image of an food');
+ foodPoints = detectSURFFeatures(fiImage);
+% figure;
+%  imshow(fiImage);
+% hold on;
+% % plot(selectStrongest(foodPoints, 100));
+% title('100 Strongest Feature Points from food Image');
+[foodFeatures, foodPoints] = extractFeatures(fiImage, foodPoints);
+  foodPairs = matchFeatures(foodFeatures, sceneFeatures, 'MaxRatio', 0.9);
+if (size(foodPairs,1)>= size(scenePoints,1)/10)
+  matchedfoodPoints = foodPoints(foodPairs(:, 1), :);
+matchedScenePoints = scenePoints(foodPairs(:, 2), :);
+figure
+showMatchedFeatures(fiImage, sceneImage, matchedfoodPoints, ...
+    matchedScenePoints, 'montage');
+title('Putatively Matched Points (Including Outliers)');
+
+ foodPolygon = [1, 1;...                                 % top-left
+         size(fiImage, 2), 1;...                       % top-right
+         size(fiImage, 2), size(fiImage, 1);...  % bottom-right
+         1, size(fiImage, 1);...                       % bottom-left
+         1,1];                         % top-left again to close the polygon
+ 
+     newfoodPolygon = transformPointsForward(tform, foodPolygon);
+ 
+     figure;
+      imshow(sceneImage);
+     hold on;
+      line(newfoodPolygon(:, 1), newfoodPolygon(:, 2), 'Color', 'g');
+     title('Detected food and Box');
+     break;
+end
+end
+ 
+
+if (i>=1&&i<=10)
+    disp('Apple ');
+    
+elseif(i>=11&&i<=19)
+    disp('Banana');
+elseif(i>=20&&i<=24)
+    disp('Coconut');
+elseif(i>=26&&i<=30)
+    disp('Pineapple');
+elseif(i>=31&&i<=36)
+    disp('Strawberry');
+else
+    disp('Not found');
+end
+
+    
